@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard</title>
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">My Dashboard</div>
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav">
+    <a class="active" href="#home"><span class="nav-icon">⌂</span> Overview</a>
+    <a href="#focus"><span class="nav-icon">◷</span> Focus Timer</a>
+    <a href="#tasks"><span class="nav-icon">✓</span> My Tasks</a>
+    <a href="#links"><span class="nav-icon">↗</span> Quick Links</a>
+  </nav>
+  <div class="sidebar-bottom"><strong>✦ Small steps matter</strong><p>Stay consistent, focus on one thing at a time, and make today count.</p></div>
+</aside>
+
+<main class="main" id="home">
+  <header class="topbar">
+    <div><div class="eyebrow" id="today-label">DASHBOARD</div><h1><span id="greeting">Selamat datang</span>, <span class="wish">have a great day!</span> <span id="greet-emoji">👋</span></h1><div class="subtitle">A little progress each day adds up to big results.</div></div>
+  </header>
+
+  <section class="hero">
+    <div><h2>Make today count.</h2><p>Plan your tasks, stay focused, and keep moving forward.<br>Your next productive session starts here.</p></div>
+    <div class="hero-clock" role="timer" aria-label="Jam saat ini">
+      <div class="clock-time" id="clock">
+        <div class="unit"><span id="c-h">00</span><small>JAM</small></div><i>:</i>
+        <div class="unit"><span id="c-m">00</span><small>MENIT</small></div><i>:</i>
+        <div class="unit"><span id="c-s">00</span><small>DETIK</small></div>
+      </div>
+      <div class="clock-date" id="clock-date">—</div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-icon">☑</div><div><small>Total tasks</small><strong id="total-count">0</strong></div></div>
+    <div class="stat"><div class="stat-icon">✓</div><div><small>Completed</small><strong id="done-count">0</strong></div></div>
+    <div class="stat"><div class="stat-icon">◎</div><div><small>Completion rate</small><strong id="rate-count">0%</strong></div></div>
+  </section>
+
+  <section class="section-grid">
+    <article class="panel" id="focus">
+      <div class="panel-head"><div><h3>Focus Timer</h3><div class="panel-sub">One task at a time. You got this.</div></div><span class="pill">POMODORO</span></div>
+      <div class="timer-wrap">
+        <div class="timer-ring" id="timer-ring"><div class="timer-inner"><div class="timer-time" id="timer">25:00</div><div class="timer-caption" id="timer-status">READY TO FOCUS</div></div></div>
+        <div class="timer-controls"><button class="btn btn-primary" id="start-btn">▶ Start</button><button class="btn btn-light" id="reset-btn">↺ Reset</button></div>
+        <div class="timer-note">Atur durasi sesuai kebutuhanmu.</div>
+        <div class="timer-settings">
+          <label>Focus (menit)
+            <input class="field timer-input" id="focus-minutes" type="number" min="1" max="180" value="25">
+          </label>
+          <label>Break (menit)
+            <input class="field timer-input" id="break-minutes" type="number" min="1" max="60" value="5">
+          </label>
+          <button class="btn btn-light" id="apply-timer">Apply</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel" id="tasks">
+      <div class="panel-head"><div><h3>My To-Do List</h3><div class="panel-sub">Keep track of what matters.</div></div><span class="pill" id="task-pill">0 TASKS</span></div>
+      <form class="add-row" id="task-form"><input class="field" id="task-input" placeholder="Add a new task..." maxlength="90" autocomplete="off"><button class="add-btn" aria-label="Add task">+</button></form>
+      <div class="task-list" id="task-list"><div class="empty">No tasks yet. Add your first task!</div></div>
+    </article>
+  </section>
+
+  <section class="lower-grid">
+    <article class="panel" id="links">
+      <div class="panel-head"><div><h3>Quick Links</h3><div class="panel-sub">Your favorite websites, all in one place.</div></div><span class="pill">SHORTCUTS</span></div>
+      <form class="add-row" id="link-form"><input class="field" id="link-name" placeholder="Link name" maxlength="30" required><input class="field" id="link-url" placeholder="Website URL" required><button class="add-btn" aria-label="Add link">+</button></form>
+      <div class="link-list" id="link-list"><div class="empty">Add a website you use often.</div></div>
+    </article>
+    <article class="panel">
+      <div class="panel-head"><div><h3>A little reminder</h3><div class="panel-sub">A note for your productive day.</div></div><span class="pill">DAILY NOTE</span></div>
+      <div class="tip"><strong>Focus on progress, not perfection.</strong><br>Break big goals into small tasks. Take short breaks, stay hydrated, and remember that consistency is more important than doing everything at once.</div>
+      <div class="tip" style="margin-top:10px">💡 <strong>Quick tip:</strong> Try starting with the easiest task. Building momentum can make the next step feel easier.</div>
+    </article>
+  </section>
+  <div class="footer">MY DASHBOARD · YOUR PERSONAL PRODUCTIVITY SPACE</div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="script.js?v=5"></script>
+</body>
+</html>
