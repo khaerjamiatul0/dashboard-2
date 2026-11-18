@@ -3,7 +3,27 @@ const storage = {
   get(key, fallback){try{return JSON.parse(localStorage.getItem(key)) ?? fallback}catch{return fallback}},
   set(key, value){try{localStorage.setItem(key, JSON.stringify(value))}catch{}}
 };
+let audioContext = null;
 
+function enableAudio() {
+  const AudioContextClass =
+    window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    console.warn("Browser tidak mendukung Web Audio API");
+    return;
+  }
+
+  if (!audioContext) {
+    audioContext = new AudioContextClass();
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume().catch(error => {
+      console.warn("Audio gagal diaktifkan:", error);
+    });
+  }
+}
 function showToast(message){
   const toast=$('toast'); toast.textContent=message; toast.classList.add('show');
   clearTimeout(showToast.timeout); showToast.timeout=setTimeout(()=>toast.classList.remove('show'),2000);
@@ -109,60 +129,94 @@ function stopTimer(){
 }
 
 // Alarm: 5 siklus "bip-bip-bip" (± 9 detik), keras, memakai Web Audio API.
-function playAlarm(){
-  try{
-    const AudioContext=window.AudioContext||window.webkitAudioContext;
-    if(!AudioContext)return;
-    const context=new AudioContext();
-    if(context.state==='suspended')context.resume();
-    const master=context.createGain();
-    master.gain.value=1; // volume maksimum
-    const comp=context.createDynamicsCompressor(); // menjaga suara tetap keras tanpa pecah
-    master.connect(comp);comp.connect(context.destination);
-    const t0=context.currentTime+0.05;
-    let end=0;
-    for(let cycle=0;cycle<5;cycle++){
-      for(let beep=0;beep<3;beep++){
-        const start=t0+cycle*1.8+beep*0.45;
-        const stop=start+0.32;
-        // dua nada (square + sine) agar lebih nyaring
-        [['square',880,0.45],['sine',1320,0.5]].forEach(([type,freq,vol])=>{
-          const osc=context.createOscillator(),gain=context.createGain();
-          osc.type=type;osc.frequency.value=freq;
-          gain.gain.setValueAtTime(0.0001,start);
-          gain.gain.exponentialRampToValueAtTime(vol,start+0.02);
-          gain.gain.setValueAtTime(vol,stop-0.06);
-          gain.gain.exponentialRampToValueAtTime(0.0001,stop);
-          osc.connect(gain);gain.connect(master);
-          osc.start(start);osc.stop(stop+0.02);
-        });
-        end=stop;
+function playAlarm() {
+  try {
+    if (!audioContext) return;
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+
+    const context = audioContext;
+    const master = context.createGain();
+    master.gain.value = 1;
+
+    const comp = context.createDynamicsCompressor();
+    master.connect(comp);
+    comp.connect(context.destination);
+
+    const t0 = context.currentTime + 0.05;
+    let end = 0;
+
+    for (let cycle = 0; cycle < 5; cycle++) {
+      for (let beep = 0; beep < 3; beep++) {
+        const start = t0 + cycle * 1.8 + beep * 0.45;
+        const stop = start + 0.32;
+
+        [["square", 880, 0.45], ["sine", 1320, 0.5]]
+          .forEach(([type, freq, vol]) => {
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+
+            osc.type = type;
+            osc.frequency.value = freq;
+
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(vol, start + 0.02);
+            gain.gain.setValueAtTime(vol, stop - 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.0001, stop);
+
+            osc.connect(gain);
+            gain.connect(master);
+
+            osc.start(start);
+            osc.stop(stop + 0.02);
+          });
+
+        end = stop;
       }
     }
-    setTimeout(()=>context.close(),(end-context.currentTime+0.5)*1000);
-  }catch(error){console.warn('Audio tidak dapat diputar:',error)}
+  } catch (error) {
+    console.warn("Audio tidak dapat diputar:", error);
+  }
 }
 
 function startTimer(){
   if(running)return;
-  running=true;endAt=Date.now()+seconds*1000;
+
+  enableAudio();
+  running=true;
+  endAt=Date.now()+seconds*1000;
+
   $('start-btn').textContent='Ⅱ Pause';
   $('timer-status').textContent=mode==='focus'?'FOCUS TIME':'BREAK TIME';
+
   interval=setInterval(()=>{
     seconds=Math.max(0,Math.round((endAt-Date.now())/1000));
     drawTimer();
+
     if(seconds<=0){
-      stopTimer();
+      clearInterval(interval);
+      interval=null;
+
       playAlarm();
+
       if(mode==='focus'){
-        mode='break';seconds=breakMinutes*60;
+        mode='break';
+        seconds=breakMinutes*60;
         showToast('Focus selesai! Saatnya istirahat.');
       }else{
-        mode='focus';seconds=focusMinutes*60;
+        mode='focus';
+        seconds=focusMinutes*60;
         showToast('Waktu istirahat selesai! Siap fokus lagi?');
       }
-      $('timer-status').textContent=mode==='focus'?'READY TO FOCUS':'READY FOR BREAK';
+
+      $('timer-status').textContent=mode==='focus'?'FOCUS TIME':'BREAK TIME';
       drawTimer();
+
+      // Otomatis memulai sesi berikutnya
+      running=false;
+      startTimer();
     }
   },250);
 }
